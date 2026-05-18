@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TikTok Login...</title>
+    <style>
+        body { font-family: sans-serif; background: #0a0a0a; color: #fff;
+               display: flex; flex-direction: column; align-items: center;
+               justify-content: center; height: 100vh; gap: 16px; }
+        .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1);
+                   border-top-color: #fe2c55; border-radius: 50%;
+                   animation: spin .8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .err { color: #ff6b6b; }
+    </style>
+</head>
+<body>
+    <div id="icon" style="font-size:52px">🎵</div>
+    <div class="spinner" id="spin"></div>
+    <h2 id="msg">Đang xác thực TikTok...</h2>
+    <p id="sub" style="opacity:.6">Cửa sổ này sẽ tự đóng.</p>
+    <script>
+        (function () {
+            const p     = new URLSearchParams(location.search);
+            const code  = p.get('code');
+            const state = p.get('state');
+            const error = p.get('error');
+
+            if (error || !code) {
+                document.getElementById('spin').style.display = 'none';
+                document.getElementById('icon').textContent = '❌';
+                document.getElementById('msg').textContent = 'Đăng nhập thất bại.';
+                document.getElementById('msg').classList.add('err');
+                document.getElementById('sub').textContent = error || 'Không nhận được code.';
+                if (window.opener)
+                    window.opener.postMessage({ type: 'TIKTOK_OAUTH_CALLBACK', code: null, state }, '*');
+                setTimeout(() => window.close(), 2500);
+                return;
+            }
+
+            document.getElementById('icon').textContent = '✅';
+            document.getElementById('spin').style.display = 'none';
+            document.getElementById('msg').textContent = 'Đăng nhập thành công!';
+            document.getElementById('sub').textContent = 'Đang hoàn tất, cửa sổ tự đóng...';
+
+            if (window.opener)
+                window.opener.postMessage({ type: 'TIKTOK_OAUTH_CALLBACK', code, state }, '*');
+
+            setTimeout(() => window.close(), 1500);
+        })();
+    </script>
+</body>
+</html>
